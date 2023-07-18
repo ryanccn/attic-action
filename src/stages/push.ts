@@ -3,7 +3,7 @@ import { exec } from "@actions/exec";
 
 export const push = async () => {
   const cache = getInput("cache");
-  const paths = getMultilineInput("token");
+  const paths = getMultilineInput("paths");
 
   await exec("attic", ["push", cache, ...paths]);
 };
