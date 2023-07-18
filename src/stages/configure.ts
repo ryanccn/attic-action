@@ -4,8 +4,9 @@ import { exec } from "@actions/exec";
 export const configure = async () => {
   startGroup("Configure attic");
   const endpoint = getInput("endpoint");
+  const cache = getInput("cache");
   const token = getInput("token");
 
-  await exec("attic", ["login", "--set-default", "ci", endpoint, token]);
+  await exec("attic", ["login", "--set-default", cache, endpoint, token]);
   endGroup();
 };
