@@ -8,9 +8,9 @@ inputs:
   cache:
     description: "attic cache"
     required: true
-  paths:
-    description: "paths to upload"
-    required: true
+  skip-push:
+    description: "set to true to disable pushing to the cache"
+    required: false
   token:
     description: "attic token"
     required: false

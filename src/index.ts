@@ -1,12 +1,18 @@
 import { install } from "./stages/install";
 import { configure } from "./stages/configure";
 import { push } from "./stages/push";
+import { getState, saveState } from "@actions/core";
 
-(async () => {
+const isPost = !!getState("isPost");
+
+async function setup() {
   await install();
   await configure();
-  await push();
-})().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+}
+
+if (!isPost) {
+  saveState("isPost", "true");
+  setup();
+} else {
+  push();
+}
