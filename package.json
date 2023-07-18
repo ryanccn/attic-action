@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Cache Nix derivations with attic",
   "scripts": {
-    "build": "esbuild src/index.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax"
+    "build": "esbuild src/index.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "Ryan Cao <hello@ryanccn.dev>",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^16.18.38",
     "esbuild": "^0.18.14",
+    "prettier": "3.0.0",
     "typescript": "^5.1.6"
   },
   "packageManager": "pnpm@8.6.9"
