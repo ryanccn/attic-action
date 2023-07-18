@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Cache Nix derivations with attic",
   "scripts": {
-    "build": "esbuild src/index.ts src/post.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax"
+    "build": "esbuild src/index.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax"
   },
   "keywords": [],
   "author": "Ryan Cao <hello@ryanccn.dev>",
