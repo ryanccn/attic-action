@@ -1,0 +1,23 @@
+name: "attic"
+description: "Cache Nix derivations with attic"
+
+inputs:
+  endpoint:
+    description: "attic endpoint"
+    required: true
+  cache:
+    description: "attic cache"
+    required: true
+  paths:
+    description: "paths to upload"
+    required: true
+  token:
+    description: "attic token"
+    required: false
+
+outputs:
+
+runs:
+  using: "node16"
+  main: "dist/index.js"
+  post: "dist/post.js"

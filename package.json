@@ -1,0 +1,22 @@
+{
+  "name": "@ryanccn/attic-action",
+  "version": "0.1.0",
+  "description": "Cache Nix derivations with attic",
+  "scripts": {
+    "build": "esbuild src/index.ts src/post.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax"
+  },
+  "keywords": [],
+  "author": "Ryan Cao <hello@ryanccn.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/exec": "^1.1.1",
+    "ofetch": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.38",
+    "esbuild": "^0.18.14",
+    "typescript": "^5.1.6"
+  },
+  "packageManager": "pnpm@8.6.9"
+}
