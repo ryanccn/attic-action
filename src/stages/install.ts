@@ -16,7 +16,6 @@ export const install = async () => {
 		if (!r.ok) {
 			core.setFailed(`Action failed with error: ${r.statusText}`);
 			core.endGroup();
-
 			process.exit(1);
 		}
 
