@@ -19,6 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Build
+        run: pnpm install && pnpm build
+
       - name: Install Nix
         uses: cachix/install-nix-action@v22
 

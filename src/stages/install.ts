@@ -9,14 +9,13 @@ import { join } from "node:path";
 export const install = async () => {
 	core.startGroup("Install attic");
 
-	core.info("Installing attic");
-	const installScript = await fetch(
-		"https://raw.githubusercontent.com/zhaofengli/attic/main/.github/install-attic-ci.sh",
-	).then((r) => {
-		if (!r.ok) {
-			core.setFailed(`Action failed with error: ${r.statusText}`);
-			core.endGroup();
-
+  core.info("Installing attic");
+  const installScript = await fetch(
+    "https://raw.githubusercontent.com/zhaofengli/attic/main/.github/install-attic-ci.sh",
+  ).then((r) => {
+    if (!r.ok) {
+      core.setFailed(`Action failed with error: ${r.statusText}`);
+      core.endGroup();
 			process.exit(1);
 		}
 
