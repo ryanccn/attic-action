@@ -1,21 +1,27 @@
 import { exec } from "@actions/exec";
 import { Writable } from "node:stream";
 
-const streamToString = (stream: Writable): Promise<string> => {
-  const chunks: Buffer[] = [];
-  return new Promise((resolve, reject) => {
-    stream.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on("error", (err) => reject(err));
-    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-  });
-};
+class StringStream extends Writable {
+  chunks: Buffer[] = [];
+
+  _write(
+    chunk: WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>,
+    _enc: unknown,
+    next: () => unknown
+  ) {
+    this.chunks.push(Buffer.from(chunk));
+    next();
+  }
+
+  string() {
+    return Buffer.concat(this.chunks).toString("utf-8");
+  }
+}
 
 export const getStorePaths = async () => {
-  const outStream = new Writable();
+  const outStream = new StringStream();
   await exec("nix", ["path-info", "--all"], { outStream });
-  const paths = await streamToString(outStream)
-    .then((res) => res.split("\n"))
-    .then((paths) => paths.filter(Boolean));
+  const paths = outStream.string().split("\n").filter(Boolean);
 
   return paths;
 };
