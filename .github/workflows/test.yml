@@ -31,9 +31,6 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v22
 
-      - name: Setup nixpkgs
-        run: nix-channel --add https://nixos.org/channels/nixpkgs-unstable && nix-channel --update
-
       - name: Setup Attic Cache
         uses: ./
         with:
@@ -41,5 +38,5 @@ jobs:
           cache: ${{ secrets.ATTIC_CACHE }}
           token: ${{ secrets.ATTIC_TOKEN }}
 
-      - name: Build
-        run: nix-build test.nix
+      - name: Build Nix Package
+        run: nix build -f test.nix
