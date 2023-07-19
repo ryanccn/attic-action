@@ -15,7 +15,15 @@ export const push = async () => {
       core.info("Pushing to cache");
       const oldPaths = JSON.parse(core.getState("initial-paths")) as string[];
       const newPaths = await getStorePaths();
-      const addedPaths = newPaths.filter((p) => !oldPaths.includes(p));
+      const addedPaths = newPaths
+        .filter((p) => !oldPaths.includes(p))
+        .filter(
+          (p) =>
+            !p.endsWith(".drv") &&
+            !p.endsWith(".drv.chroot") &&
+            !p.endsWith(".check") &&
+            !p.endsWith(".lock")
+        );
 
       await exec("attic", ["push", cache, ...addedPaths]);
     }
