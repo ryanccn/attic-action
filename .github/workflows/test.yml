@@ -16,17 +16,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v3
-        with:
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Build
-        run: pnpm install && pnpm build
-
-      - uses: cachix/install-nix-action@v22
+      - name: Install Nix
+        uses: cachix/install-nix-action@v22
 
       - name: Setup Attic Cache
         uses: ./

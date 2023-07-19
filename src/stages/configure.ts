@@ -1,22 +1,24 @@
-import { getInput, startGroup, endGroup, setFailed, info } from "@actions/core";
+import * as core from "@actions/core";
 import { exec } from "@actions/exec";
+import { getStorePaths } from "../utils";
 
 export const configure = async () => {
-  startGroup("Configure attic");
+  core.startGroup("Configure attic");
 
   try {
-    const endpoint = getInput("endpoint");
-    const cache = getInput("cache");
-    const token = getInput("token");
+    const endpoint = core.getInput("endpoint");
+    const cache = core.getInput("cache");
+    const token = core.getInput("token");
 
-    info("Logging in to attic cache");
+    core.info("Logging in to attic cache");
     await exec("attic", ["login", "--set-default", cache, endpoint, token]);
-    // remember existing source paths
-    info("Collecting store paths before build");
-    await exec(`${__dirname}/list-nix-store.sh > /tmp/store-path-pre-build`);
+
+    core.info("Collecting store paths before build");
+    const paths = await getStorePaths();
+    core.saveState("initial-paths", JSON.stringify(paths));
   } catch (e) {
-    setFailed(`Action failed with error: ${e}`);
+    core.setFailed(`Action failed with error: ${e}`);
   }
 
-  endGroup();
+  core.endGroup();
 };
