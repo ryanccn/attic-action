@@ -1,22 +1,26 @@
-name: "attic"
+name: "attic-action"
+author: "Ryan Cao"
 description: "Cache Nix derivations with attic"
+
+branding:
+  icon: "layers"
+  color: "blue"
 
 inputs:
   endpoint:
-    description: "attic endpoint"
+    description: "Attic endpoint"
     required: true
   cache:
-    description: "attic cache"
+    description: "Attic cache name"
     required: true
   skip-push:
-    description: "set to true to disable pushing to the cache"
+    description: "Disable pushing to the cache automatically"
     required: false
   token:
-    description: "attic token"
+    description: "Attic authorization token"
     required: false
 
 runs:
   using: "node16"
   main: "dist/index.js"
   post: "dist/index.js"
-  post-if: "success()"
