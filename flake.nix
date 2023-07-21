@@ -1,5 +1,5 @@
 {
-  description = "";
+  description = "Github Action for caching Nix derivations with attic";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
@@ -26,6 +26,16 @@
       };
     });
 
-    formatter = forEachSystem (p: p.nixpkgs-fmt);
+    formatter = forEachSystem (p: p.alejandra);
+
+    packages = forEachSystem (p: let
+      time = toString builtins.currentTime;
+      test = p.runCommand "test-${time}" {} ''
+        echo ${time} > $out
+      '';
+    in {
+      inherit test;
+      default = test;
+    });
   };
 }
