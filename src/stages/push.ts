@@ -2,8 +2,7 @@ import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 
 import splitArray from "just-split";
-import { getStorePaths } from "../utils";
-
+import { saveStorePaths, getStorePaths } from "../utils";
 export const push = async () => {
 	core.startGroup("Push to Attic");
 
@@ -15,8 +14,9 @@ export const push = async () => {
 			const cache = core.getInput("cache");
 
 			core.info("Pushing to cache");
-			const oldPaths = JSON.parse(core.getState("initial-paths")) as string[];
-			const newPaths = await getStorePaths();
+			const oldPaths = await 	getStorePaths();
+			await saveStorePaths();
+			const newPaths = await getStorePaths(); 
 			const addedPaths = newPaths
 				.filter((p) => !oldPaths.includes(p))
 				.filter(
