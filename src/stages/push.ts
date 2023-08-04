@@ -1,5 +1,7 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
+
+import splitArray from "just-split";
 import { getStorePaths } from "../utils";
 
 export const push = async () => {
@@ -21,7 +23,10 @@ export const push = async () => {
 					(p) => !p.endsWith(".drv") && !p.endsWith(".drv.chroot") && !p.endsWith(".check") && !p.endsWith(".lock"),
 				);
 
-			await exec("attic", ["push", cache, ...addedPaths]);
+			const splitAddedPaths = splitArray(addedPaths, 25);
+			for (const addedPaths of splitAddedPaths) {
+				await exec("attic", ["push", cache, ...addedPaths]);
+			}
 		}
 	} catch (e) {
 		core.setFailed(`Action failed with error: ${e}`);

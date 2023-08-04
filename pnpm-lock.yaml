@@ -11,6 +11,9 @@ dependencies:
   '@actions/exec':
     specifier: ^1.1.1
     version: 1.1.1
+  just-split:
+    specifier: ^3.2.0
+    version: 3.2.0
   ofetch:
     specifier: ^1.1.1
     version: 1.1.1
@@ -289,6 +292,10 @@ packages:
       '@esbuild/win32-ia32': 0.18.14
       '@esbuild/win32-x64': 0.18.14
     dev: true
+
+  /just-split@3.2.0:
+    resolution: {integrity: sha512-hh57dN5koTBkmg3T6gBFISVVaW5bgZ6Ct1W5KODD5M7hQJKqGzTKkfMwOil8MBxyztLQEjh/v6UGXE8cP5tnqQ==}
+    dev: false
 
   /node-fetch-native@1.2.0:
     resolution: {integrity: sha512-5IAMBTl9p6PaAjYCnMv5FmqIF6GcZnawAVnzaCG0rX2aYZJ4CxEkZNtVPuTRug7fL7wyM5BQYTlAzcyMPi6oTQ==}
