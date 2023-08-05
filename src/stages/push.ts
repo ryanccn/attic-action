@@ -14,9 +14,9 @@ export const push = async () => {
 			const cache = core.getInput("cache");
 
 			core.info("Pushing to cache");
-			const oldPaths = await 	getStorePaths();
+			const oldPaths = await getStorePaths();
 			await saveStorePaths();
-			const newPaths = await getStorePaths(); 
+			const newPaths = await getStorePaths();
 			const addedPaths = newPaths
 				.filter((p) => !oldPaths.includes(p))
 				.filter(
