@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
-import { getStorePaths } from "../utils";
+import { saveStorePaths } from "../utils";
 
 export const configure = async () => {
 	core.startGroup("Configure attic");
@@ -14,8 +14,7 @@ export const configure = async () => {
 		await exec("attic", ["login", "--set-default", cache, endpoint, token]);
 
 		core.info("Collecting store paths before build");
-		const paths = await getStorePaths();
-		core.saveState("initial-paths", JSON.stringify(paths));
+		await saveStorePaths();
 	} catch (e) {
 		core.setFailed(`Action failed with error: ${e}`);
 	}
