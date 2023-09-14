@@ -19,6 +19,9 @@ inputs:
   token:
     description: "Attic authorization token"
     required: false
+  skip-use:
+    description: "Set to true to skip using attic cache as a substituter"
+    required: false
 
 runs:
   using: "node16"
