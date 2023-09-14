@@ -15,10 +15,10 @@ export const configure = async () => {
 		await exec("attic", ["login", "--set-default", cache, endpoint, token]);
 
 		if (skipUse === "true") {
-			core.info('Not adding attic cache to substituters as skip-use is set to true');
+			core.info("Not adding attic cache to substituters as skip-use is set to true");
 		} else {
 			core.info("Adding attic cache to substituters");
-			await exec.exec('attic', ['use', cache]);
+			await exec("attic", ["use", cache]);
 		}
 
 		core.info("Collecting store paths before build");
