@@ -1,6 +1,5 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
-import { fetch } from "ofetch";
 
 import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
