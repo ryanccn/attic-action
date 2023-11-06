@@ -25,15 +25,5 @@
     });
 
     formatter = forAllSystems (p: p.alejandra);
-
-    packages = forAllSystems (p: let
-      time = toString builtins.currentTime;
-      test = p.runCommand "test-${time}" {} ''
-        echo ${time} > $out
-      '';
-    in {
-      inherit test;
-      default = test;
-    });
   };
 }
