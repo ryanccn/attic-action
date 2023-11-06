@@ -19,7 +19,8 @@
       default = pkgs.mkShell {
         packages = with pkgs; [
           actionlint
-          nodePackages.pnpm
+          nodejs_20
+          (nodePackages_latest.pnpm.override {nodejs = nodejs_20;})
         ];
       };
     });
