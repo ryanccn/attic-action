@@ -6,36 +6,25 @@
   };
 
   outputs = {nixpkgs, ...}: let
-    mkSystems = sys: builtins.map (arch: "${arch}-${sys}") ["x86_64" "aarch64"];
-    systems =
-      mkSystems "linux"
-      ++ mkSystems "darwin";
+    systems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
 
-    forAllSystems = nixpkgs.lib.genAttrs systems;
-    nixpkgsFor = forAllSystems (system: import nixpkgs {inherit system;});
-
-    forEachSystem = fn:
-      forAllSystems (s: fn nixpkgsFor.${s});
+    forAllSystems = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
   in {
-    devShells = forEachSystem (pkgs: {
+    devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         packages = with pkgs; [
           actionlint
-          nodePackages.pnpm
+          nodejs_20
+          (nodePackages_latest.pnpm.override {nodejs = nodejs_20;})
         ];
       };
     });
 
-    formatter = forEachSystem (p: p.alejandra);
-
-    packages = forEachSystem (p: let
-      time = toString builtins.currentTime;
-      test = p.runCommand "test-${time}" {} ''
-        echo ${time} > $out
-      '';
-    in {
-      inherit test;
-      default = test;
-    });
+    formatter = forAllSystems (p: p.alejandra);
   };
 }

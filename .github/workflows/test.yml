@@ -38,4 +38,4 @@ jobs:
           token: ${{ secrets.ATTIC_TOKEN }}
 
       - name: Build Nix Package
-        run: nix build --impure --show-trace -L .#test
+        run: nix-build test.nix
