@@ -32,7 +32,8 @@ export const push = async () => {
 			}
 		}
 	} catch (e) {
-		core.setFailed(`Action failed with error: ${e}`);
+		core.warning(`Action encountered error: ${e}`);
+		core.info("Not considering errors during push a failure.");
 	}
 
 	core.endGroup();
