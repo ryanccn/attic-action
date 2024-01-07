@@ -28,7 +28,7 @@ jobs:
         run: pnpm install && pnpm build
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v7
+        uses: DeterminateSystems/nix-installer-action@v9
 
       - name: Setup Attic Cache
         uses: ./
