@@ -33,3 +33,8 @@ export const install = async () => {
 
 	core.endGroup();
 };
+
+export const isInstalled = async () => {
+	let return_code = await exec("attic", ["-V"]);
+	return return_code === 0;
+};
