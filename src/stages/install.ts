@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
+import { findInPath } from "@actions/io";
 
 export const install = async () => {
 	core.startGroup("Install attic");
@@ -16,6 +17,5 @@ export const install = async () => {
 };
 
 export const isInstalled = async () => {
-	let returnCode = await exec("attic", ["-V"]);
-	return returnCode === 0;
+	return (await findInPath("attic")).length > 0;
 };
