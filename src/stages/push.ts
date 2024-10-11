@@ -1,7 +1,6 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 
-import split from "just-split";
 import { saveStorePaths, getStorePaths } from "../utils";
 
 export const push = async () => {
@@ -26,16 +25,9 @@ export const push = async () => {
 					(p) => !p.endsWith(".drv") && !p.endsWith(".drv.chroot") && !p.endsWith(".check") && !p.endsWith(".lock"),
 				);
 
-			const splitAddedPaths = split(addedPaths, 25);
-			for (const addedPaths of splitAddedPaths) {
-				await exec("attic", ["push", cache, ...addedPaths]);
-			}
-
-			// https://github.com/zhaofengli/attic/pull/176
-
-			// await exec("attic", ["push", cache, "--stdin"], {
-			// 	input: Buffer.from(addedPaths.join("\n")),
-			// });
+			await exec("attic", ["push", "--stdin", cache], {
+				input: Buffer.from(addedPaths.join("\n")),
+			});
 		}
 	} catch (e) {
 		core.warning(`Action encountered error: ${e}`);
