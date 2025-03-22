@@ -1,5 +1,5 @@
 {
-  description = "Github Action for caching Nix derivations with attic";
+  description = "Github Action for caching Nix derivations with Attic";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

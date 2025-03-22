@@ -1,21 +1,22 @@
-name: Release
+name: "Build"
 
 on:
-  release:
-    types: [published, edited]
+  push:
+    branches: ["main"]
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
-    permissions:
-      contents: write
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name }}
 
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -29,7 +30,3 @@ jobs:
 
       - name: Build
         run: pnpm run build
-
-      - uses: JasonEtco/build-and-tag-action@v2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}

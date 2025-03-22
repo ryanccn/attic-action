@@ -1,6 +1,6 @@
 name: "attic-action"
 author: "Ryan Cao"
-description: "Cache Nix derivations with attic"
+description: "Cache Nix derivations with Attic"
 
 branding:
   icon: "layers"
@@ -13,6 +13,9 @@ inputs:
   cache:
     description: "Attic cache name"
     required: true
+  inputs-from:
+    description: "Path to get the Nixpkgs flake input from instead of `github:NixOS/nixpkgs/nixpkgs-unstable`"
+    required: false
   skip-push:
     description: "Disable pushing to the cache automatically"
     required: false
@@ -20,7 +23,7 @@ inputs:
     description: "Attic authorization token"
     required: false
   skip-use:
-    description: "Set to true to skip using attic cache as a substituter"
+    description: "Set to true to skip using Attic cache as a substituter"
     required: false
 
 runs:

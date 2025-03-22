@@ -4,7 +4,7 @@ Cache Nix derivations with [Attic](https://github.com/zhaofengli/attic).
 
 ## Usage
 
-Configure your attic instance with an endpoint, a cache, and a token that can read from and write to the cache. Then, add this step to a workflow job after Nix is installed:
+Configure your Attic instance with an endpoint, a cache, and a token that can read from and write to the cache. Then, add this step to a workflow job after Nix is installed:
 
 ```yaml
 - name: Setup Attic cache

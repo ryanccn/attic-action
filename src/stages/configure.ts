@@ -3,7 +3,7 @@ import { exec } from "@actions/exec";
 import { saveStorePaths } from "../utils";
 
 export const configure = async () => {
-	core.startGroup("Configure attic");
+	core.startGroup("Configure Attic");
 
 	try {
 		const endpoint = core.getInput("endpoint");
@@ -11,13 +11,13 @@ export const configure = async () => {
 		const token = core.getInput("token");
 		const skipUse = core.getInput("skip-use");
 
-		core.info("Logging in to attic cache");
+		core.info("Logging in to Attic cache");
 		await exec("attic", ["login", "--set-default", cache, endpoint, token]);
 
 		if (skipUse === "true") {
-			core.info("Not adding attic cache to substituters as skip-use is set to true");
+			core.info("Not adding Attic cache to substituters as skip-use is set to true");
 		} else {
-			core.info("Adding attic cache to substituters");
+			core.info("Adding Attic cache to substituters");
 			await exec("attic", ["use", cache]);
 		}
 
