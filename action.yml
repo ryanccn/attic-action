@@ -16,6 +16,12 @@ inputs:
   inputs-from:
     description: "Path to get the Nixpkgs flake input from instead of `github:NixOS/nixpkgs/nixpkgs-unstable`"
     required: false
+  include-paths:
+    description: "Regular expressions for matching paths to include when pushing (delimited by newlines)"
+    required: false
+  exclude-paths:
+    description: "Regular expressions for matching paths to exclude when pushing (delimited by newlines)"
+    required: false
   skip-push:
     description: "Disable pushing to the cache automatically"
     required: false
@@ -27,6 +33,6 @@ inputs:
     required: false
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
   post: "dist/index.js"

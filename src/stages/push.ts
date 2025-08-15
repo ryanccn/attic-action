@@ -19,14 +19,24 @@ export const push = async () => {
 			await saveStorePaths();
 			const newPaths = await getStorePaths();
 
-			const addedPaths = newPaths
+			let pushPaths = newPaths
 				.filter((p) => !oldPaths.includes(p))
 				.filter(
 					(p) => !p.endsWith(".drv") && !p.endsWith(".drv.chroot") && !p.endsWith(".check") && !p.endsWith(".lock"),
 				);
 
+			const includePaths = core.getMultilineInput("include-paths").map((v) => new RegExp(v));
+			if (includePaths.length > 0) {
+				pushPaths = pushPaths.filter((p) => includePaths.some((v) => v.test(p)));
+			}
+
+			const excludePaths = core.getMultilineInput("exclude-paths").map((v) => new RegExp(v));
+			if (excludePaths.length > 0) {
+				pushPaths = pushPaths.filter((p) => !excludePaths.some((v) => v.test(p)));
+			}
+
 			await exec("attic", ["push", "--stdin", cache], {
-				input: Buffer.from(addedPaths.join("\n")),
+				input: Buffer.from(pushPaths.join("\n")),
 			});
 		}
 	} catch (e) {
