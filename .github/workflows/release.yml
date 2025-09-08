@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
 
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: pnpm
