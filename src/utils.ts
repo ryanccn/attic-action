@@ -3,11 +3,15 @@ import { exec } from "@actions/exec";
 import { readFile } from "node:fs/promises";
 
 export const saveStorePaths = async () => {
-	await exec("sh", ["-c", "nix path-info --all --json > /tmp/store-paths"]);
+	await exec("sh", ["-c", "nix path-info --all --json > ${RUNNER_TEMP:-/tmp}/attic-action-store-paths"]);
 };
 
 export const getStorePaths = async () => {
-	const rawStorePaths = JSON.parse(await readFile("/tmp/store-paths", "utf8")) as { path: string }[];
+	const rawStorePaths = JSON.parse(
+		await readFile(`${process.env["RUNNER_TEMP"] || "/tmp"}/attic-action-store-paths`, "utf8"),
+	) as {
+		path: string;
+	}[];
 
 	// compatibility with Nix 2.18
 	if (Array.isArray(rawStorePaths)) {
