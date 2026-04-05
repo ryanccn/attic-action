@@ -19,7 +19,8 @@ export const getStorePaths = async () => {
 		await readFile(`${process.env["RUNNER_TEMP"] || "/tmp"}/attic-action-store-paths`, "utf8"),
 	) as {
 		info: Record<string, unknown>;
+		storeDir: string;
 	};
 
-	return Object.keys(raw.info);
+	return Object.keys(raw.info).map((k) => `${raw.storeDir}/${k}`);
 };
