@@ -1,8 +1,6 @@
 {
-  description = "Github Action for caching Nix derivations with Attic";
-
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
   outputs =
@@ -22,12 +20,18 @@
         default = pkgs.mkShell {
           packages = with pkgs; [
             actionlint
-            nodejs_20
-            (nodePackages_latest.pnpm.override { nodejs = nodejs_20; })
+            nodejs_24
+            (nodePackages_latest.pnpm.override { nodejs = nodejs_24; })
           ];
         };
       });
 
-      formatter = forAllSystems (p: p.nixfmt-rfc-style);
+      packages = forAllSystems (pkgs: {
+        impure-test = pkgs.runCommand "impure-test" { } ''
+          echo ${toString builtins.currentTime} > $out
+        '';
+      });
+
+      formatter = forAllSystems (p: p.nixfmt);
     };
 }

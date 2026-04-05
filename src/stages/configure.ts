@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
-import { saveStorePaths } from "../utils";
+import { INTERNAL_DRY_RUN, saveStorePaths } from "../utils";
 
 export const configure = async () => {
 	core.startGroup("Configure Attic");
@@ -12,13 +12,13 @@ export const configure = async () => {
 		const skipUse = core.getInput("skip-use");
 
 		core.info("Logging in to Attic cache");
-		await exec("attic", ["login", "--set-default", cache, endpoint, token]);
+		if (!INTERNAL_DRY_RUN) await exec("attic", ["login", "--set-default", cache, endpoint, token]);
 
 		if (skipUse === "true") {
 			core.info("Not adding Attic cache to substituters as skip-use is set to true");
 		} else {
 			core.info("Adding Attic cache to substituters");
-			await exec("attic", ["use", cache]);
+			if (!INTERNAL_DRY_RUN) await exec("attic", ["use", cache]);
 		}
 
 		core.info("Collecting store paths before build");

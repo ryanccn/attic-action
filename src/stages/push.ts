@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 
-import { saveStorePaths, getStorePaths } from "../utils";
+import { saveStorePaths, getStorePaths, INTERNAL_DRY_RUN } from "../utils";
 
 export const push = async () => {
 	core.startGroup("Push to Attic");
@@ -35,9 +35,13 @@ export const push = async () => {
 				pushPaths = pushPaths.filter((p) => !excludePaths.some((v) => v.test(p)));
 			}
 
-			await exec("attic", ["push", "--stdin", cache], {
-				input: Buffer.from(pushPaths.join("\n")),
-			});
+			if (!INTERNAL_DRY_RUN) {
+				await exec("attic", ["push", "--stdin", cache], {
+					input: Buffer.from(pushPaths.join("\n")),
+				});
+			} else {
+				console.log("Pushing paths", pushPaths);
+			}
 		}
 	} catch (e) {
 		core.warning(`Action encountered error: ${e}`);

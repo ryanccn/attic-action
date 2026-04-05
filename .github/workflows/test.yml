@@ -1,0 +1,42 @@
+name: "Test"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test-cache:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Build
+        run: pnpm install --frozen-lockfile && pnpm build
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Setup Attic cache
+        uses: ./
+        with:
+          endpoint: "foo"
+          cache: "bar"
+          __internal-dry-run: true
+
+      - name: Build impure test package
+        run: nix build --impure .#impure-test

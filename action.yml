@@ -31,6 +31,9 @@ inputs:
   skip-use:
     description: "Set to true to skip using Attic cache as a substituter"
     required: false
+  __internal-dry-run:
+    description: "Skip steps that require interacting with an actual Attic server"
+    required: false
 
 runs:
   using: "node24"

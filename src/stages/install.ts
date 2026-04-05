@@ -11,9 +11,9 @@ export const install = async () => {
 
 	try {
 		if (inputsFrom) {
-			await exec("nix", ["profile", "install", "--inputs-from", inputsFrom, "nixpkgs#attic-client"]);
+			await exec("nix", ["profile", "add", "--inputs-from", inputsFrom, "nixpkgs#attic-client"]);
 		} else {
-			await exec("nix", ["profile", "install", "github:NixOS/nixpkgs/nixpkgs-unstable#attic-client"]);
+			await exec("nix", ["profile", "add", "github:NixOS/nixpkgs/nixpkgs-unstable#attic-client"]);
 		}
 	} catch (e) {
 		core.setFailed(`Action failed with error: ${e}`);

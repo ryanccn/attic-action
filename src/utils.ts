@@ -1,22 +1,25 @@
+import { getInput } from "@actions/core";
 import { exec } from "@actions/exec";
 
 import { readFile } from "node:fs/promises";
 
+export const INTERNAL_DRY_RUN = ["true", "1", "yes"].includes(
+	getInput("__internal-dry-run", { required: false, trimWhitespace: true }),
+);
+
 export const saveStorePaths = async () => {
-	await exec("sh", ["-c", "nix path-info --all --json > ${RUNNER_TEMP:-/tmp}/attic-action-store-paths"]);
+	await exec("sh", [
+		"-c",
+		"nix path-info --all --json --json-format 2 > ${RUNNER_TEMP:-/tmp}/attic-action-store-paths",
+	]);
 };
 
 export const getStorePaths = async () => {
-	const rawStorePaths = JSON.parse(
+	const raw = JSON.parse(
 		await readFile(`${process.env["RUNNER_TEMP"] || "/tmp"}/attic-action-store-paths`, "utf8"),
 	) as {
-		path: string;
-	}[];
+		info: Record<string, unknown>;
+	};
 
-	// compatibility with Nix 2.18
-	if (Array.isArray(rawStorePaths)) {
-		return rawStorePaths.map((path) => path.path);
-	}
-
-	return Object.keys(rawStorePaths);
+	return Object.keys(raw.info);
 };
