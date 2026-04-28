@@ -9,15 +9,15 @@
 	"author": "Ryan Cao <hello@ryanccn.dev>",
 	"license": "MIT",
 	"dependencies": {
-		"@actions/core": "^3.0.0",
+		"@actions/core": "^3.0.1",
 		"@actions/exec": "^3.0.0",
 		"@actions/io": "^3.0.2"
 	},
 	"devDependencies": {
-		"@types/node": "^25.5.2",
+		"@types/node": "^25.6.0",
 		"esbuild": "^0.28.0",
-		"prettier": "3.8.1",
-		"typescript": "^6.0.2"
+		"prettier": "3.8.3",
+		"typescript": "^6.0.3"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
