@@ -22,6 +22,10 @@ inputs:
   exclude-paths:
     description: "Regular expressions for matching paths to exclude when pushing (delimited by newlines)"
     required: false
+  path-discovery-mode:
+    description: "How to discover paths to push: 'store-scan' snapshots /nix/store before/after the job, 'post-build-hook' collects Nix-built OUT_PATHS"
+    required: false
+    default: "store-scan"
   skip-push:
     description: "Disable pushing to the cache automatically"
     required: false
