@@ -80,20 +80,89 @@ export const getPostBuildHookPaths = async () => {
 	return Array.from(paths).sort();
 };
 
+type HookEventRecord = {
+	ts?: string;
+	pid?: number;
+	drvPath?: string | null;
+	rawOutPaths?: string;
+	paths?: string[];
+	pathsFile?: string | null;
+	chained?: { hook: string; status: number | null; error?: string } | null;
+	skipped?: { reason: string; detail?: string };
+	error?: { message: string; stack?: string };
+};
+
+const summarizeHookEvent = (event: HookEventRecord, index: number): string => {
+	const parts: string[] = [];
+	parts.push(`#${index + 1} ${event.ts ?? "?"} pid=${event.pid ?? "?"}`);
+	if (event.drvPath) parts.push(`  drv:     ${event.drvPath}`);
+	const paths = event.paths ?? [];
+	parts.push(`  paths:   ${paths.length}${paths.length > 0 ? ` (${paths.join(", ")})` : ""}`);
+	if (event.pathsFile) parts.push(`  file:    ${event.pathsFile}`);
+	if (event.skipped) {
+		parts.push(`  skipped: ${event.skipped.reason}${event.skipped.detail ? ` — ${event.skipped.detail}` : ""}`);
+	}
+	if (event.chained) {
+		const { hook, status, error } = event.chained;
+		parts.push(`  chained: ${hook} (status=${status ?? "n/a"}${error ? `, error=${error}` : ""})`);
+	}
+	if (event.error) parts.push(`  error:   ${event.error.message}`);
+	return parts.join("\n");
+};
+
 export const printPostBuildHookCaptureLog = async () => {
 	const { eventsLog } = getPostBuildHookState();
 
 	core.startGroup("Attic post-build hook capture log");
-	if (await exists(eventsLog)) {
-		const content = await readFile(eventsLog, "utf8");
-		if (content.trim() !== "") {
-			core.info(content.trimEnd());
-		} else {
-			core.warning("No hook invocations were captured. This usually means no new paths were built (e.g. all outputs were already in the store or fetched from a substituter), or less commonly that the collector was not installed in Nix's active config.");
-		}
-	} else {
-		core.warning("No hook invocations were captured. This usually means no new paths were built (e.g. all outputs were already in the store or fetched from a substituter), or less commonly that the collector was not installed in Nix's active config.");
+
+	const emptyMessage =
+		"No hook invocations were captured. This usually means no new paths were built (e.g. all outputs were already in the store or fetched from a substituter), or less commonly that the collector was not installed in Nix's active config.";
+
+	if (!(await exists(eventsLog))) {
+		core.warning(emptyMessage);
+		core.endGroup();
+		return;
 	}
+
+	const content = await readFile(eventsLog, "utf8");
+	const lines = content.split(/\r?\n/).filter((l) => l.trim() !== "");
+
+	if (lines.length === 0) {
+		core.warning(emptyMessage);
+		core.endGroup();
+		return;
+	}
+
+	const events: HookEventRecord[] = [];
+	const malformed: string[] = [];
+	for (const line of lines) {
+		try {
+			events.push(JSON.parse(line));
+		} catch {
+			malformed.push(line);
+		}
+	}
+
+	const totalPaths = events.reduce((sum, e) => sum + (e.paths?.length ?? 0), 0);
+	core.info(`Captured ${events.length} hook invocation(s); ${totalPaths} path(s) reported by Nix.`);
+
+	for (let i = 0; i < events.length; i++) {
+		core.info(summarizeHookEvent(events[i]!, i));
+	}
+
+	if (malformed.length > 0) {
+		core.warning(`Ignored ${malformed.length} malformed event log line(s).`);
+		if (core.isDebug()) {
+			for (const line of malformed) core.debug(`malformed line: ${line}`);
+		}
+	}
+
+	if (core.isDebug()) {
+		core.startGroup("Raw event log (JSONL)");
+		core.debug(content.trimEnd());
+		core.endGroup();
+	}
+
 	core.endGroup();
 };
 
@@ -102,13 +171,17 @@ export const configurePostBuildHookPathDiscovery = async () => {
 	const stateDir = join(runnerTemp, "attic-action-post-build-hook");
 	const pathsDir = join(stateDir, "paths");
 	const eventsLog = join(stateDir, "events.log");
-	const wrapper = join(stateDir, "post-build-hook.sh");
+	const wrapper = join(stateDir, "post-build-hook.js");
 	const config = join(stateDir, "nix.conf");
 	const discoveredHook = await currentPostBuildHook();
 	const originalHook = discoveredHook?.hook ?? "";
 
-	await mkdir(pathsDir, { recursive: true });
-	await writeFile(eventsLog, "");
+	// Sticky world-writable so the nix-daemon (root) and the runner user can
+	// both read/write here regardless of which one created the dir first.
+	await mkdir(pathsDir, { recursive: true, mode: 0o1777 });
+	await chmod(pathsDir, 0o1777);
+	await writeFile(eventsLog, "", { mode: 0o666 });
+	await chmod(eventsLog, 0o666);
 	await writeFile(wrapper, postBuildHookScript({ pathsDir, eventsLog, wrapper, originalHook }), { mode: 0o755 });
 	await chmod(wrapper, 0o755);
 	await writeFile(config, `post-build-hook = ${wrapper}\n`);
@@ -163,7 +236,7 @@ const getPostBuildHookState = (): PostBuildHookState => {
 		wrapper:
 			core.getState(`${POST_BUILD_HOOK_STATE_PREFIX}-wrapper`) ||
 			process.env["ATTIC_POST_BUILD_HOOK"] ||
-			join(stateDir, "post-build-hook.sh"),
+			join(stateDir, "post-build-hook.js"),
 		originalHook:
 			core.getState(`${POST_BUILD_HOOK_STATE_PREFIX}-original-hook`) ||
 			process.env["ATTIC_ORIGINAL_POST_BUILD_HOOK"] ||
@@ -204,69 +277,20 @@ const postBuildHookFromText = (text: string) => {
 	return hook;
 };
 
-const postBuildHookScript = ({ pathsDir, eventsLog, wrapper, originalHook }: PostBuildHookState) => `#!/usr/bin/env bash
-set -euo pipefail
-
-paths_dir=${shellQuote(pathsDir)}
-events_log=${shellQuote(eventsLog)}
-wrapper=${shellQuote(wrapper)}
-original_hook=${shellQuote(originalHook)}
-
-record_out_paths() {
-  if [[ -z "\${OUT_PATHS:-}" ]]; then
-    return 0
-  fi
-
-  mkdir -p "$paths_dir"
-  tmp=$(mktemp "$paths_dir/paths.XXXXXX")
-  kept=0
-
-  {
-    {
-      printf 'hook %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      printf 'raw OUT_PATHS: %s\n' "$OUT_PATHS"
-      printf 'filtered paths:\n'
-    } >> "$events_log"
-
-    for path in $OUT_PATHS; do
-      case "$path" in
-        *.drv | *.drv.chroot | *.check | *.lock) ;;
-        *)
-          printf '%s\n' "$path"
-          printf '  %s\n' "$path" >> "$events_log"
-          kept=$((kept + 1))
-          ;;
-      esac
-    done
-
-    printf 'kept: %s\n\n' "$kept" >> "$events_log"
-  } > "$tmp"
-
-  if [[ "$kept" -eq 0 ]]; then
-    rm -f "$tmp"
-  fi
-}
-
-if ! record_out_paths; then
-  echo "attic-action post-build hook: failed to record OUT_PATHS; continuing" >&2
-fi
-
-if [[ -n "$original_hook" ]]; then
-  if [[ "$original_hook" == "$wrapper" ]]; then
-    echo "attic-action post-build hook: original hook points to this wrapper; skipping to avoid recursion" >&2
-    exit 0
-  fi
-
-  if [[ -x "$original_hook" ]]; then
-    printf 'chaining original hook: %s\n\n' "$original_hook" >> "$events_log"
-    "$original_hook" "$@"
-  else
-    echo "attic-action post-build hook: original hook is not executable: $original_hook" >&2
-  fi
-fi
+// The wrapper installed into Nix's `post-build-hook` is a tiny Node shim
+// that requires the bundled `dist/post-build-hook.js` and invokes it with
+// the absolute paths baked in. We do this instead of relying on environment
+// variables because the nix-daemon strips/normalizes the env it passes to
+// hooks. Bundling lets us write the hook in TypeScript with the same
+// toolchain as the rest of the action while keeping the runtime artifact
+// fully self-contained (no `node_modules` lookup at hook time).
+const postBuildHookScript = (state: PostBuildHookState) => {
+	const bundlePath = join(__dirname, "post-build-hook.js");
+	const config = JSON.stringify(state);
+	return `#!/usr/bin/env node
+require(${JSON.stringify(bundlePath)}).runHook(${config});
 `;
-
-const shellQuote = (value: string) => `'${value.replaceAll("'", "'\\''")}'`;
+};
 
 const exists = async (path: string) => {
 	try {
