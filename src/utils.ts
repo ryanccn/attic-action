@@ -89,10 +89,10 @@ export const printPostBuildHookCaptureLog = async () => {
 		if (content.trim() !== "") {
 			core.info(content.trimEnd());
 		} else {
-			core.warning("No hook invocations were captured. The collector may not be installed in Nix's active config.");
+			core.warning("No hook invocations were captured. This usually means no new paths were built (e.g. all outputs were already in the store or fetched from a substituter), or less commonly that the collector was not installed in Nix's active config.");
 		}
 	} else {
-		core.warning("No hook invocations were captured. The collector may not be installed in Nix's active config.");
+		core.warning("No hook invocations were captured. This usually means no new paths were built (e.g. all outputs were already in the store or fetched from a substituter), or less commonly that the collector was not installed in Nix's active config.");
 	}
 	core.endGroup();
 };
