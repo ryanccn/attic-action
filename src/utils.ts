@@ -287,7 +287,11 @@ const postBuildHookFromText = (text: string) => {
 const postBuildHookScript = (state: PostBuildHookState) => {
 	const bundlePath = join(__dirname, "post-build-hook.js");
 	const config = JSON.stringify(state);
-	return `#!/usr/bin/env node
+	// Bake in the absolute path to the node binary running the action rather
+	// than relying on `/usr/bin/env node`. On macOS the nix-daemon is launched
+	// by launchd with a minimal PATH that does not include the node installed
+	// by `actions/setup-node`, so a PATH lookup fails with ENOENT.
+	return `#!${process.execPath}
 require(${JSON.stringify(bundlePath)}).runHook(${config});
 `;
 };
