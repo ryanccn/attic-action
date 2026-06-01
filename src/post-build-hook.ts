@@ -20,9 +20,16 @@ export type HookConfig = {
 };
 
 // One JSON object per invocation, one line per object. Designed to be
-// `jq`-friendly when read back in the post step and to survive interleaving
-// from concurrent daemon-spawned hook processes (a single `appendFileSync`
-// of a line < PIPE_BUF is atomic on Linux).
+// `jq`-friendly when read back in the post step. Concurrent hook
+// invocations from the nix-daemon may interleave writes here: POSIX only
+// guarantees atomicity for pipe/FIFO writes <= PIPE_BUF, not for regular
+// files, so we tolerate (rather than prevent) interleaving by:
+//   1. keeping each line small (well under a page) to reduce the window,
+//   2. opening with O_APPEND via `appendFileSync` so writes advance the
+//      shared offset under the kernel inode lock on Linux (a defense in
+//      depth — not portable across all filesystems / platforms),
+//   3. having the post-step reader skip malformed lines and emit a
+//      warning rather than failing.
 //
 // The hook intentionally records every path Nix reports verbatim; all
 // filtering (temporary paths, include/exclude regexes) happens in the post
@@ -43,15 +50,10 @@ type HookEvent = {
 const splitOutPaths = (raw: string) => raw.split(/\s+/).filter((p) => p !== "");
 
 const writeEvent = (config: HookConfig, event: HookEvent) => {
-	// Single write of `JSON\n`; on Linux writes <= PIPE_BUF (4096) to a file
-	// opened in append mode are atomic, so concurrent hook invocations won't
-	// interleave lines.
 	try {
 		appendFileSync(config.eventsLog, JSON.stringify(event) + "\n");
 	} catch (error) {
-		process.stderr.write(
-			`attic-action post-build hook: failed to write event log: ${(error as Error).message}\n`,
-		);
+		process.stderr.write(`attic-action post-build hook: failed to write event log: ${(error as Error).message}\n`);
 	}
 };
 

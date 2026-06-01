@@ -9,6 +9,27 @@ export const INTERNAL_DRY_RUN = ["true", "1", "yes"].includes(
 	core.getInput("__internal-dry-run", { required: false, trimWhitespace: true }),
 );
 
+const TEMPORARY_PATH_SUFFIXES = [".drv", ".drv.chroot", ".check", ".lock"];
+
+export const excludeTemporaryPaths = (paths: string[]): string[] =>
+	paths.filter((p) => !TEMPORARY_PATH_SUFFIXES.some((suffix) => p.endsWith(suffix)));
+
+export const applyPathFilters = (paths: string[]): string[] => {
+	let result = paths;
+
+	const includePaths = core.getMultilineInput("include-paths").map((v) => new RegExp(v));
+	if (includePaths.length > 0) {
+		result = result.filter((p) => includePaths.some((v) => v.test(p)));
+	}
+
+	const excludePaths = core.getMultilineInput("exclude-paths").map((v) => new RegExp(v));
+	if (excludePaths.length > 0) {
+		result = result.filter((p) => !excludePaths.some((v) => v.test(p)));
+	}
+
+	return result;
+};
+
 export const PATH_DISCOVERY_STORE_SCAN = "store-scan";
 export const PATH_DISCOVERY_POST_BUILD_HOOK = "post-build-hook";
 
@@ -24,7 +45,7 @@ type PostBuildHookState = {
 };
 
 type DiscoveredHook = {
-	source: "CACHIX_DAEMON_DIR" | "NIX_CONF" | "NIX_USER_CONF_FILES";
+	source: "CACHIX_DAEMON_DIR" | "NIX_CONFIG" | "NIX_USER_CONF_FILES";
 	hook: string;
 };
 
@@ -80,7 +101,7 @@ export const getPostBuildHookPaths = async () => {
 	return Array.from(paths).sort();
 };
 
-type HookEventRecord = {
+export type HookEventRecord = {
 	ts?: string;
 	pid?: number;
 	drvPath?: string | null;
@@ -92,7 +113,7 @@ type HookEventRecord = {
 	error?: { message: string; stack?: string };
 };
 
-const summarizeHookEvent = (event: HookEventRecord, index: number): string => {
+export const summarizeHookEvent = (event: HookEventRecord, index: number): string => {
 	const parts: string[] = [];
 	parts.push(`#${index + 1} ${event.ts ?? "?"} pid=${event.pid ?? "?"}`);
 	if (event.drvPath) parts.push(`  drv:     ${event.drvPath}`);
@@ -193,8 +214,13 @@ export const configurePostBuildHookPathDiscovery = async () => {
 	core.exportVariable("ATTIC_POST_BUILD_HOOK", wrapper);
 	core.exportVariable("ATTIC_ORIGINAL_POST_BUILD_HOOK", originalHook);
 
-	if (process.env["NIX_CONF"]) {
-		core.exportVariable("NIX_CONF", `${process.env["NIX_CONF"]}\npost-build-hook = ${wrapper}`);
+	// Nix reads inline configuration from `NIX_CONFIG` (see `man nix.conf`,
+	// "Configuration file" step 3). Earlier versions of this file referenced
+	// `NIX_CONF`, which Nix does not honor — that meant any post-build-hook
+	// already set inline (e.g. by another action injecting into `NIX_CONFIG`)
+	// was silently ignored and our wrapper never composed with it.
+	if (process.env["NIX_CONFIG"]) {
+		core.exportVariable("NIX_CONFIG", `${process.env["NIX_CONFIG"]}\npost-build-hook = ${wrapper}`);
 	} else {
 		const existingNixUserConfFiles = process.env["NIX_USER_CONF_FILES"];
 		core.exportVariable(
@@ -244,15 +270,15 @@ const getPostBuildHookState = (): PostBuildHookState => {
 	};
 };
 
-const currentPostBuildHook = async (): Promise<DiscoveredHook | undefined> => {
+export const currentPostBuildHook = async (): Promise<DiscoveredHook | undefined> => {
 	const cachixDaemonDir = process.env["CACHIX_DAEMON_DIR"];
 	if (cachixDaemonDir) {
 		const hook = join(cachixDaemonDir, "post-build-hook.sh");
 		if (await exists(hook)) return { source: "CACHIX_DAEMON_DIR", hook };
 	}
 
-	const nixConfHook = postBuildHookFromText(process.env["NIX_CONF"] || "");
-	if (nixConfHook) return { source: "NIX_CONF", hook: nixConfHook };
+	const nixConfigHook = postBuildHookFromText(process.env["NIX_CONFIG"] || "");
+	if (nixConfigHook) return { source: "NIX_CONFIG", hook: nixConfigHook };
 
 	const nixUserConfFiles = process.env["NIX_USER_CONF_FILES"];
 	if (nixUserConfFiles) {
@@ -267,7 +293,7 @@ const currentPostBuildHook = async (): Promise<DiscoveredHook | undefined> => {
 	return undefined;
 };
 
-const postBuildHookFromText = (text: string) => {
+export const postBuildHookFromText = (text: string) => {
 	let hook: string | undefined;
 	for (const line of text.split(/\r?\n/)) {
 		const match = line.match(/^\s*post-build-hook\s*=\s*(.+?)\s*$/);
@@ -284,8 +310,13 @@ const postBuildHookFromText = (text: string) => {
 // hooks. Bundling lets us write the hook in TypeScript with the same
 // toolchain as the rest of the action while keeping the runtime artifact
 // fully self-contained (no `node_modules` lookup at hook time).
-const postBuildHookScript = (state: PostBuildHookState) => {
-	const bundlePath = join(__dirname, "post-build-hook.js");
+export const postBuildHookScript = (state: PostBuildHookState) => {
+	// `__dirname` is defined in the bundled CJS output (`dist/index.js`) and
+	// resolves to the dist directory at runtime, so the sibling bundle
+	// `post-build-hook.js` is discoverable. When loaded as ESM (e.g. tests),
+	// fall back to `import.meta.url`-derived path.
+	const here = typeof __dirname !== "undefined" ? __dirname : new URL(".", import.meta.url).pathname;
+	const bundlePath = join(here, "post-build-hook.js");
 	const config = JSON.stringify(state);
 	// Bake in the absolute path to the node binary running the action rather
 	// than relying on `/usr/bin/env node`. On macOS the nix-daemon is launched

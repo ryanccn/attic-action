@@ -28,6 +28,9 @@ jobs:
       - name: Build
         run: pnpm install --frozen-lockfile && pnpm build
 
+      - name: Unit tests
+        run: pnpm test
+
       - name: Install Nix
         uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe # ratchet:cachix/install-nix-action@v31
 

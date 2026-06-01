@@ -2,6 +2,8 @@ import * as core from "@actions/core";
 import { exec } from "@actions/exec";
 
 import {
+	applyPathFilters,
+	excludeTemporaryPaths,
 	getPathDiscovery,
 	getPostBuildHookPaths,
 	getStorePaths,
@@ -11,27 +13,6 @@ import {
 	printPostBuildHookCaptureLog,
 	saveStorePaths,
 } from "../utils";
-
-const excludeTemporaryPaths = (paths: string[]) =>
-	paths.filter(
-		(p) => !p.endsWith(".drv") && !p.endsWith(".drv.chroot") && !p.endsWith(".check") && !p.endsWith(".lock"),
-	);
-
-const applyPathFilters = (paths: string[]) => {
-	let pushPaths = paths;
-
-	const includePaths = core.getMultilineInput("include-paths").map((v) => new RegExp(v));
-	if (includePaths.length > 0) {
-		pushPaths = pushPaths.filter((p) => includePaths.some((v) => v.test(p)));
-	}
-
-	const excludePaths = core.getMultilineInput("exclude-paths").map((v) => new RegExp(v));
-	if (excludePaths.length > 0) {
-		pushPaths = pushPaths.filter((p) => !excludePaths.some((v) => v.test(p)));
-	}
-
-	return pushPaths;
-};
 
 export const push = async () => {
 	core.startGroup("Push to Attic");
