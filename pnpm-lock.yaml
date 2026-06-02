@@ -17,6 +17,9 @@ importers:
       '@actions/io':
         specifier: ^3.0.2
         version: 3.0.2
+      string-argv:
+        specifier: ^0.3.2
+        version: 0.3.2
     devDependencies:
       '@types/node':
         specifier: ^25.5.2
@@ -214,6 +217,10 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  string-argv@0.3.2:
+    resolution: {integrity: sha512-aqD2Q0144Z+/RqG52NeHEkZauTAUWJO8c6yTftGJKO3Tja5tUgIfmIl6kExvhtxSDP7fXB6DvzkfMpCd/F3G+Q==}
+    engines: {node: '>=0.6.19'}
+
   tunnel@0.0.6:
     resolution: {integrity: sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==}
     engines: {node: '>=0.6.11 <=0.7.0 || >=0.7.3'}
@@ -360,6 +367,8 @@ snapshots:
       '@esbuild/win32-x64': 0.28.0
 
   prettier@3.8.1: {}
+
+  string-argv@0.3.2: {}
 
   tunnel@0.0.6: {}
 

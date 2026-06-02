@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import { exec } from "@actions/exec";
+import stringArgv from "string-argv";
 
 import { saveStorePaths, getStorePaths, INTERNAL_DRY_RUN } from "../utils";
 
@@ -13,6 +14,7 @@ export const push = async () => {
 			core.info("Pushing to cache is disabled by skip-push");
 		} else {
 			const cache = core.getInput("cache");
+			const pushArgs = stringArgv(core.getInput("push-args"));
 			core.info("Pushing to cache");
 
 			const oldPaths = await getStorePaths();
@@ -36,7 +38,7 @@ export const push = async () => {
 			}
 
 			if (!INTERNAL_DRY_RUN) {
-				await exec("attic", ["push", "--stdin", cache], {
+				await exec("attic", ["push", ...pushArgs, "--stdin", cache], {
 					input: Buffer.from(pushPaths.join("\n")),
 				});
 			} else {

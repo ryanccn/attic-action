@@ -11,7 +11,8 @@
 	"dependencies": {
 		"@actions/core": "^3.0.0",
 		"@actions/exec": "^3.0.0",
-		"@actions/io": "^3.0.2"
+		"@actions/io": "^3.0.2",
+		"string-argv": "^0.3.2"
 	},
 	"devDependencies": {
 		"@types/node": "^25.5.2",
