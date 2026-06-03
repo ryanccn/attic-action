@@ -30,6 +30,8 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - uses: JasonEtco/build-and-tag-action@dd5e4991048c325f6d85b4155e586fc211c644da # ratchet:JasonEtco/build-and-tag-action@v2
+      - uses: teunmooij/github-versioned-release@3edf649c6e5e5e976d43f2584b15bdc8b4c8f0df # ratchet:teunmooij/github-versioned-release@v1
+        with:
+          template: javascript-action
         env:
           GITHUB_TOKEN: ${{ github.token }}
