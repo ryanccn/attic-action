@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        path-discovery-mode: [store-scan, post-build-hook]
 
     runs-on: ${{ matrix.os }}
 
@@ -39,6 +40,7 @@ jobs:
         with:
           endpoint: "foo"
           cache: "bar"
+          path-discovery-mode: ${{ matrix.path-discovery-mode }}
           __internal-dry-run: true
 
       - name: Build impure test package
