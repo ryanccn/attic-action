@@ -4,7 +4,7 @@
 	"description": "Cache Nix derivations with Attic",
 	"scripts": {
 		"build": "esbuild src/index.ts src/post-build-hook.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax",
-		"test": "node --test",
+		"test": "node --test --experimental-test-coverage",
 		"format": "prettier --write ."
 	},
 	"engines": {
