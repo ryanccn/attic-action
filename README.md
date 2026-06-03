@@ -13,6 +13,7 @@ Configure your Attic instance with an endpoint, a cache, and a token that can re
     endpoint: ${{ secrets.ATTIC_ENDPOINT }}
     cache: ${{ secrets.ATTIC_CACHE }}
     token: ${{ secrets.ATTIC_TOKEN }}
+    path-discovery-mode: post-build-hook # or `store-scan`, which is the default if omitted
 ```
 
 ## Inputs
@@ -42,7 +43,8 @@ How to discover store paths to push automatically (**default is `store-scan`**).
 - `store-scan` snapshots `/nix/store` before and after the job and pushes the difference. This is the existing behavior and captures paths that were substituted during the job.
 - `post-build-hook` installs a Nix post-build hook and pushes only paths Nix built locally via `OUT_PATHS`. This avoids paths that were merely substituted from another cache, but requires the workflow user to be allowed to set Nix's `post-build-hook` option.
 
-When using `post-build-hook`, ordering matters. Run `attic-action` after any other action that installs a Nix `post-build-hook` (for example `cachix/cachix-action`) and before the `nix build` steps you want to cache. Nix has a single effective `post-build-hook`; this action can only compose with hooks that already exist when it runs. If a later action overwrites the hook, Attic path discovery will be bypassed.
+> [!WARNING]
+> When using `post-build-hook` with another action that installs a Nix `post-build-hook` (for example `cachix/cachix-action`), ordering matters. Run `attic-action` after that action and before the `nix build` steps you want to cache. Nix has a single effective `post-build-hook`; this action can only compose with hooks that already exist when it runs. If a later action overwrites the hook, Attic path discovery will be bypassed.
 
 ## Outputs
 
