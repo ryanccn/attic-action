@@ -22,6 +22,9 @@ inputs:
   exclude-paths:
     description: "Regular expressions for matching paths to exclude when pushing (delimited by newlines)"
     required: false
+  push-args:
+    description: "Additional command-line arguments to pass to `attic push`"
+    required: false
   skip-push:
     description: "Disable pushing to the cache automatically"
     required: false

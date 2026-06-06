@@ -29,6 +29,14 @@ The name of the Attic cache.
 
 The authorization token to provide to Attic (**optional**).
 
+### `inputs-from`
+
+Path to get the Nixpkgs flake input from instead of `github:NixOS/nixpkgs/nixpkgs-unstable` when installing Attic (**optional**).
+
+### `push-args`
+
+Additional command-line arguments to pass to `attic push` (**optional**).
+
 ### `skip-push`
 
 Disable pushing new derivations to the cache automatically at the end of the job (**default is false**).
