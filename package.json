@@ -15,7 +15,7 @@
 		"string-argv": "^0.3.2"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^26.0.0",
 		"esbuild": "^0.28.0",
 		"prettier": "3.8.3",
 		"typescript": "^6.0.3"
