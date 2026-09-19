@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"target": "es2022",
+		"target": "es2025",
 		"allowJs": true,
 		"resolveJsonModule": true,
 		"moduleDetection": "force",
@@ -13,7 +13,8 @@
 		"noImplicitOverride": true,
 		"module": "preserve",
 		"noEmit": true,
-		"lib": ["es2022"]
+		"lib": ["es2025"],
+		"types": ["node"]
 	},
 	"include": ["**/*.js", "**/*.ts"],
 	"exclude": ["node_modules/*", "**/node_modules/*", "dist/*"]

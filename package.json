@@ -2,12 +2,13 @@
 	"name": "@ryanccn/attic-action",
 	"main": "dist/index.js",
 	"description": "Cache Nix derivations with Attic",
-	"scripts": {
-		"build": "esbuild src/index.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax",
-		"format": "prettier --write ."
-	},
 	"author": "Ryan Cao <hello@ryanccn.dev>",
 	"license": "MIT",
+	"scripts": {
+		"build": "esbuild src/index.ts --outdir=dist --platform=node --format=cjs --bundle --minify-whitespace --minify-syntax",
+		"check": "tsc --noEmit",
+		"format": "prettier --write ."
+	},
 	"dependencies": {
 		"@actions/core": "^3.0.1",
 		"@actions/exec": "^3.0.0",
@@ -15,15 +16,21 @@
 		"string-argv": "^0.3.2"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
-		"esbuild": "^0.28.0",
-		"prettier": "3.8.3",
+		"@types/node": "^26.6.1",
+		"esbuild": "^0.28.2",
+		"prettier": "3.9.8",
 		"typescript": "^6.0.3"
 	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	},
-	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "12.4.2+sha512.08adc6613180275c7c9edada39dcf08c9c61ad4e7eaf330a4f3461f102b0f907423454d117f98e72d47fef0616070644d7bffc973a6a57f5090a6d7c368b07c9",
+			"onFail": "download"
+		},
+		"runtime": {
+			"name": "node",
+			"version": "24.21.0",
+			"onFail": "download"
+		}
+	}
 }

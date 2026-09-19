@@ -6,14 +6,10 @@
   outputs =
     { nixpkgs, ... }:
     let
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+      inherit (nixpkgs) lib;
 
-      forAllSystems = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
+      forAllSystems =
+        fn: lib.genAttrs lib.systems.flakeExposed (system: fn nixpkgs.legacyPackages.${system});
     in
     {
       devShells = forAllSystems (pkgs: {
@@ -32,6 +28,6 @@
         '';
       });
 
-      formatter = forAllSystems (p: p.nixfmt);
+      formatter = forAllSystems (pkgs: pkgs.nixfmt);
     };
 }
