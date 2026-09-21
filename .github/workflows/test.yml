@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        nix: [nix, lix]
 
     runs-on: ${{ matrix.os }}
 
@@ -29,7 +30,10 @@ jobs:
         run: pnpm run build
 
       - name: Install Nix
-        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # ratchet:cachix/install-nix-action@v31
+        run: .github/workflows/install-nix.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LIX: ${{ case(matrix.nix == 'lix', '1', '') }}
 
       - name: Setup Attic cache
         uses: ./
