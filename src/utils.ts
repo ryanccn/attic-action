@@ -25,8 +25,8 @@ export const saveStorePaths = async () => {
 		paths = Object.keys(data.info).map((k) => `${data.storeDir}/${k}`);
 	} else {
 		const { stdout } = await getExecOutput("nix", ["path-info", "--all", "--json"], { silent: true });
-		const data = JSON.parse(stdout) as Record<string, unknown>;
-		paths = Object.keys(data);
+		const data = JSON.parse(stdout) as { path: string }[];
+		paths = data.map((drv) => drv.path);
 	}
 
 	await writeFile(STORE_PATHS, paths.join("\n"));

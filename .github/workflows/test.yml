@@ -11,6 +11,7 @@ permissions: {}
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
         nix: [nix, lix]
